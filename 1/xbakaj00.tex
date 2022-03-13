@@ -1,0 +1,57 @@
+\documentclass[12pt,paper=a4]{article}
+
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage[left=2cm,text={17cm, 24cm},top=3cm]{geometry}
+\pagenumbering{gobble}
+
+
+% neodsazovat nové odstavce
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Titulní list %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	\begin{titlepage}
+		\begin{center}
+			\textsc{\LARGE Vysoké Učení Technické v Brně} \\[0.5cm]
+			{\LARGE Fakulta informačních technologií}
+
+			\begin{figure}[H]
+				\center\includegraphics[width=0.5\linewidth]{obr/logo.pdf}
+			\end{figure}
+
+			\vspace{3cm}
+
+			\textsc{\LARGE Databázové systémy } \\[0.5cm]
+			\textsc{\LARGE 2021/2022} \\[3.5cm]
+
+			\textbf{{\LARGE Semestrální projekt - 1. část}} \\
+			\textsc{{\LARGE Zadání 33 - Lékárna}}
+		\end{center}
+		\vfill
+		\begin{flushleft} 
+			\large
+			Radek Šerejch (xserej00),
+			Štěpán Bakaj (xbakaj00)
+			\hfill
+			Brno, \today
+		\end{flushleft}
+	\end{titlepage}
+
+	\newpage
+	\begin{center}
+		\textsc{\LARGE Popis ERD } \\[0.5cm]
+	\end{center}
+	
+	
+		Entita léky osahuje základní informace o léku, jako např. název, výroce a cenu. Z této Entity pak vycházejí její dvě specifikace, z nichž entita léků na předpis obsahuje další informaci o tom, jaký je na lék doplatek. Dále zde máme entitu zásoby, která pro určitý lék eviduje kolik kusů danného léku máme na skladě s určitým datem spotřeby. Celkový stav zásob se pak vypočítá součtem těchto hodnot. Entita prodejů dále zachycuje každý prodej. Jeden prodej se může skládat jak z léků na předpis, tak z léků k volnému prodeji. Kód pojištovny a číslo pojištěnce k léku na předpis ukládáme ve vazební tabulce, pro případ že si někdo bude chtít na jeden nákup vyzvednout lék na předpis pro více osob. Tyto hodnoty zůstanou pro léky k volnému prodeji nevyplněné. Každý prodej má dále svého zaměstnance. U zaměstnance kromě běžných atributů evidujeme zda je oprávněn k vydávání léků na recept. Telefony zaměstnanců jsou modelovány jako slabá entita, pro případ že má zaměstnanec více čísel.
+	
+	\newpage
+
+	\newpage
+\end{document}
