@@ -8,12 +8,12 @@
 
 
 DROP TABLE Telefon;
-DROP TABLE Zamestnanec;
+DROP TABLE Zasoby_prodej;
 DROP TABLE Prodej;
-DROP TABLE Lek;
 DROP TABLE Zasoby;
 DROP TABLE Pojistovna;
-DROP TABLE Zasoby_prodej;
+DROP TABLE Zamestnanec;
+DROP TABLE Lek;
 
 
 -------------------------------- CREATE ----------------------------------------
