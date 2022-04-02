@@ -24,10 +24,10 @@ CREATE TABLE Zamestnanec
     Jmeno                 VARCHAR(50),
     Prijmeni              VARCHAR(50),
     Mesto                 VARCHAR(50),
-    PSC                   VARCHAR(6),
+    PSC                   VARCHAR(6) CONSTRAINT PSC_check CHECK (REGEXP_LIKE(PSC, '^[0-9]{5}$')),
     Ulice                 VARCHAR(50),
     Cislo_popisne         INT,
-    Cislo_bankovniho_uctu VARCHAR(40),
+    Cislo_bankovniho_uctu VARCHAR(40) CONSTRAINT ucet_check CHECK (REGEXP_LIKE(Cislo_bankovniho_uctu, '^[0-9]{9}/[0-9]{4}$')),
     Predpisovy_prodej     NUMBER(1)
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE Telefon
 (
     ID_zamestnance INT,
     Poradove_cislo INT,
-    Telefon        VARCHAR(25) NOT NULL,
+    Telefon        VARCHAR(25) NOT NULL CONSTRAINT telefon_check CHECK (REGEXP_LIKE(Telefon, '^(\+?420)?(2[0-9]{2}|3[0-9]{2}|4[0-9]{2}|5[0-9]{2}|72[0-9]|73[0-9]|77[0-9]|60[1-8]|56[0-9]|70[2-5]|79[0-9])[0-9]{3}[0-9]{3}$')),
     Popis          VARCHAR(255),
     PRIMARY KEY (ID_zamestnance, Poradove_cislo),
     CONSTRAINT Telefon_FK FOREIGN KEY (ID_zamestnance) REFERENCES Zamestnanec (ID) ON DELETE CASCADE
@@ -90,7 +90,7 @@ CREATE TABLE Zasoby_prodej
     ID_prodeje       INT,
     ID_zasoby        INT,
     Kod_pojistovny   INT,
-    Cislo_pojistence VARCHAR(10),
+    Cislo_pojistence VARCHAR(10) CONSTRAINT cislo_pojistence_check CHECK (REGEXP_LIKE(Cislo_pojistence, '^[0-9]{10}$')),
     PRIMARY KEY (ID_prodeje, ID_zasoby),
     CONSTRAINT Pojistovna_FK FOREIGN KEY (Kod_pojistovny) REFERENCES Pojistovna (Kod) ON DELETE SET NULL,
     CONSTRAINT Prodej_FK FOREIGN KEY (ID_prodeje) REFERENCES Prodej (ID) ON DELETE CASCADE ,
@@ -116,3 +116,26 @@ INSERT INTO Lek (Kod, Nazev, Vyrobce, Lekova_forma, Cesta, Ucina_latka, Velikost
                  Teplota_skladovani)
 VALUES (0087906, 'KORYLAN', 'Zentiva', 'Tableta', 'Perorální podání', 'PARACETAMOL;HEMIHYDRÁT KODEIN-FOSFÁTU', 10, 120,
         'R', 50, 25);
+INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
+VALUES(1,1,'+420774023986','pracovni mobil');
+INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
+VALUES(1,2,'+420774023123','osobni mobil');
+INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
+VALUES(2,1,'+420774023321','osobni mobil');
+INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
+VALUES (TO_DATE('2023-01-01', 'yyyy/mm/dd'),10,0229792);
+INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
+VALUES (TO_DATE('2023-01-01', 'yyyy/mm/dd'),5,0087906);
+INSERT INTO Prodej(Datum,ID_zamestnance)
+VALUES(TO_TIMESTAMP('2022-01-01 23:59:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),2);
+INSERT INTO Prodej(Datum,ID_zamestnance)
+VALUES(TO_TIMESTAMP('2022-01-02 00:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),1);
+INSERT INTO Pojistovna(Kod,Nazev)
+VALUES (111,'všeobecná zdravotní pojišťovna');
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(1,1);
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(2,1);
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby,Kod_pojistovny,Cislo_pojistence)
+VALUES(2,2,111,'0101019876');
+
