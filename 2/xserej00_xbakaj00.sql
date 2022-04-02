@@ -90,7 +90,8 @@ CREATE TABLE Zasoby_prodej
     ID_prodeje       INT,
     ID_zasoby        INT,
     Kod_pojistovny   INT,
-    Cislo_pojistence VARCHAR(10) CONSTRAINT cislo_pojistence_check CHECK (REGEXP_LIKE(Cislo_pojistence, '^[0-9]{10}$')),
+    Cislo_pojistence VARCHAR(10) CONSTRAINT cislo_pojistence_check CHECK (REGEXP_LIKE(Cislo_pojistence, '^\d{2}(0[1-9]|1[0-2]|5[1-9]|6[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])\d{3,4}$'))
+                                CONSTRAINT csl_poj_check CHECK(mod(Cislo_pojistence,11) = 0),
     PRIMARY KEY (ID_prodeje, ID_zasoby),
     CONSTRAINT Pojistovna_FK FOREIGN KEY (Kod_pojistovny) REFERENCES Pojistovna (Kod) ON DELETE SET NULL,
     CONSTRAINT Prodej_FK FOREIGN KEY (ID_prodeje) REFERENCES Prodej (ID) ON DELETE CASCADE ,
