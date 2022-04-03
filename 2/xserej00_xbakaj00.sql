@@ -48,9 +48,9 @@ CREATE TABLE Lek
     Kod                INT PRIMARY KEY,
     Nazev              VARCHAR(50),
     Vyrobce            VARCHAR(50),
-    Lekova_forma       VARCHAR(25),
-    Cesta              VARCHAR(25),
-    Ucina_latka        VARCHAR(50),
+    Lekova_forma       VARCHAR(40),
+    Cesta              VARCHAR(35),
+    Ucina_latka        VARCHAR(100),
     Velikost_baleni    INT,
     Cena               INT,
     Prodej             VARCHAR(1) CHECK (Prodej IN ('V', 'R')),
@@ -109,6 +109,12 @@ VALUES ('Jana', 'Nováková', 'Brno', 60200, 'Kolejní', 2, '987654321/9999', 0)
 INSERT INTO Zamestnanec ( Jmeno, Prijmeni, Mesto, PSC, Ulice, Cislo_popisne, Cislo_bankovniho_uctu,
                          Predpisovy_prodej)
 VALUES ( 'Josef', 'Kadlec', 'Kuřim', 66434, 'Stodolní', 28, '369258147/9999', 0);
+INSERT INTO Zamestnanec ( Jmeno, Prijmeni, Mesto, PSC, Ulice, Cislo_popisne, Cislo_bankovniho_uctu,
+                         Predpisovy_prodej)
+VALUES ( 'Petra', 'Boháčková', 'Kuřim', 66434, 'Janáčkova', 50, '352477568/9999', 0);
+INSERT INTO Zamestnanec ( Jmeno, Prijmeni, Mesto, PSC, Ulice, Cislo_popisne, Cislo_bankovniho_uctu,
+                         Predpisovy_prodej)
+VALUES ( 'Marek', 'Dočekal', 'Jihlava', 58601, 'Nerudova', 15, '31-548763892/8888', 1);
 
 INSERT INTO Lek (Kod, Nazev, Vyrobce, Lekova_forma, Cesta, Ucina_latka, Velikost_baleni, Cena, Prodej, Doplatek,
                  Teplota_skladovani)
@@ -117,26 +123,70 @@ INSERT INTO Lek (Kod, Nazev, Vyrobce, Lekova_forma, Cesta, Ucina_latka, Velikost
                  Teplota_skladovani)
 VALUES (0087906, 'KORYLAN', 'Zentiva', 'Tableta', 'Perorální podání', 'PARACETAMOL;HEMIHYDRÁT KODEIN-FOSFÁTU', 10, 120,
         'R', 50, 25);
+INSERT INTO Lek (Kod, Nazev, Vyrobce, Lekova_forma, Cesta, Ucina_latka, Velikost_baleni, Cena, Prodej, Doplatek,
+                 Teplota_skladovani)
+VALUES (0254048, 'PARALEN', 'Zentiva', 'Tableta', 'Perorální podání', 'PARACETAMOL (PARACETAMOLUM)', 24, 59, 'V', NULL, 25);
+INSERT INTO Lek (Kod, Nazev, Vyrobce, Lekova_forma, Cesta, Ucina_latka, Velikost_baleni, Cena, Prodej, Doplatek,
+                 Teplota_skladovani)
+VALUES (0223159, 'MUCOSOLVAN', 'Sanofi', 'Perorální roztok/roztok k inhalaci', 'Perorální/inhalační podání', 'AMBROXOL-HYDROCHLORID (AMBROXOLI HYDROCHLORIDUM)', 60, 108, 'V', NULL, 25);
+INSERT INTO Lek (Kod, Nazev, Vyrobce, Lekova_forma, Cesta, Ucina_latka, Velikost_baleni, Cena, Prodej, Doplatek,
+                 Teplota_skladovani)
+VALUES (0059739, 'STREPSILS CITRON BEZ CUKRU', 'RECKITT BENCKISER', 'Pastilka', 'Orální podání', 'AMYLMETAKRESOL (AMYLMETACRESOLUM)2,4-DICHLORBENZYLALKOHOL (ALCOHOL 2,4-DICHLOROBENZYLICUS)', 24, 172, 'V', NULL, 25);
+
 INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
 VALUES(1,1,'+420774023986','pracovni mobil');
 INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
 VALUES(1,2,'+420774023123','osobni mobil');
 INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
 VALUES(2,1,'+420774023321','osobni mobil');
+INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
+VALUES(3,1,'+420605147852','osobni mobil');
+INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
+VALUES(4,1,'+420731258764','osobni mobil');
+INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
+VALUES(5,1,'+420702693216','osobni mobil');
+INSERT INTO Telefon(ID_zamestnance, Poradove_cislo, Telefon, Popis)
+VALUES(5,2,'+420731528416','pracovní mobil');
+
 INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
 VALUES (TO_DATE('2023-01-01', 'yyyy/mm/dd'),10,0229792);
 INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
 VALUES (TO_DATE('2023-01-01', 'yyyy/mm/dd'),5,0087906);
+INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
+VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'),10,0254048);
+INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
+VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'),5,0223159);
+INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
+VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'),5,0059739);
+
 INSERT INTO Prodej(Datum,ID_zamestnance)
 VALUES(TO_TIMESTAMP('2022-01-01 23:59:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),2);
 INSERT INTO Prodej(Datum,ID_zamestnance)
 VALUES(TO_TIMESTAMP('2022-01-02 00:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),1);
+INSERT INTO Prodej(Datum,ID_zamestnance)
+VALUES(TO_TIMESTAMP('2022-01-02 00:10:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),1);
+INSERT INTO Prodej(Datum,ID_zamestnance)
+VALUES(TO_TIMESTAMP('2022-01-03 08:22:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),4);
+INSERT INTO Prodej(Datum,ID_zamestnance)
+VALUES(TO_TIMESTAMP('2022-01-03 08:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),3);
+
+
 INSERT INTO Pojistovna(Kod,Nazev)
 VALUES (111,'všeobecná zdravotní pojišťovna');
+
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
 VALUES(1,1);
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
 VALUES(2,1);
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby,Kod_pojistovny,Cislo_pojistence)
-VALUES(2,2,111,'0101019876');
-
+VALUES(2,2,111,'0101019875');
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(3,4);
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(4,3);
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(5,4);
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(5,5);
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(5,3);
