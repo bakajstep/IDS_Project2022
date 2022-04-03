@@ -27,7 +27,7 @@ CREATE TABLE Zamestnanec
     PSC                   VARCHAR(6) CONSTRAINT PSC_check CHECK (REGEXP_LIKE(PSC, '^[0-9]{5}$')),
     Ulice                 VARCHAR(50),
     Cislo_popisne         INT,
-    Cislo_bankovniho_uctu VARCHAR(40) CONSTRAINT ucet_check CHECK (REGEXP_LIKE(Cislo_bankovniho_uctu, '^[0-9]{9}/[0-9]{4}$')),
+    Cislo_bankovniho_uctu VARCHAR(40) CONSTRAINT ucet_check CHECK (REGEXP_LIKE(Cislo_bankovniho_uctu, '^(([0-9]{0,6})-)?([0-9]{2,10})\/([0-9]{4})$')),
     Predpisovy_prodej     NUMBER(1)
 );
 
