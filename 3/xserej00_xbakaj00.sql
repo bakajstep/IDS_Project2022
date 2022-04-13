@@ -155,9 +155,7 @@ VALUES (TO_DATE('2023-01-01', 'yyyy/mm/dd'),5,0087906);
 INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
 VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'),10,0254048);
 INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
-VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'),5,0223159);
-INSERT INTO Zasoby(Datum_spotreby,Mnozstvi,Kod_leku)
-VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'),5,0059739);
+VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'),0,0223159);
 
 INSERT INTO Prodej(Datum,ID_zamestnance)
 VALUES(TO_TIMESTAMP('2022-01-01 23:59:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),2);
@@ -169,6 +167,8 @@ INSERT INTO Prodej(Datum,ID_zamestnance)
 VALUES(TO_TIMESTAMP('2022-01-03 08:22:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),4);
 INSERT INTO Prodej(Datum,ID_zamestnance)
 VALUES(TO_TIMESTAMP('2022-01-03 08:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),3);
+INSERT INTO Prodej(Datum,ID_zamestnance)
+VALUES(TO_TIMESTAMP('2022-01-03 14:59:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'),4);
 
 
 INSERT INTO Pojistovna(Kod,Nazev)
@@ -181,26 +181,52 @@ VALUES(2,1);
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby,Kod_pojistovny,Cislo_pojistence)
 VALUES(2,2,111,'0101019875');
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
-VALUES(3,4);
+VALUES(3,3);
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
 VALUES(4,3);
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
-VALUES(5,4);
-INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
-VALUES(5,5);
+VALUES(5,1);
 INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
 VALUES(5,3);
+INSERT INTO Zasoby_prodej(ID_prodeje,ID_zasoby)
+VALUES(1,3);
 
 -------------------------------- SELECT VALUES ---------------------------------
 
 --Vypíše počet prodejů každého zaměstnance
 SELECT Zamestnanec.ID,Zamestnanec.Jmeno, Zamestnanec.Prijmeni,count(Prodej.ID) as Pocet_prodeju
 FROM Zamestnanec JOIN Prodej ON Prodej.ID_zamestnance = Zamestnanec.ID
-GROUP BY Zamestnanec.Jmeno
+GROUP BY Zamestnanec.ID,Zamestnanec.Jmeno, Zamestnanec.Prijmeni;
 
---výpis pro pojišťovnu pojištěnců a léků
+--výpis výkazů pro pojišťovnu
 --TODO možná to omezit jen na nějký měsíc
 --TODO možná dát count na jednostlivé léky
 SELECT Pojistovna.Kod, Pojistovna.Nazev, Zasoby_prodej.Cislo_pojistence,Lek.Kod as Kod_leku,(Lek.Cena-Lek.Doplatek) as Proplaci_za_kus, count (*) as Pocet_kusu
 FROM Pojistovna JOIN Zasoby_prodej on Pojistovna.Kod = Zasoby_prodej.Kod_pojistovny JOIN Zasoby on Zasoby_prodej.ID_zasoby = Zasoby.ID JOIN Lek on Zasoby.Kod_leku = Lek.Kod
 GROUP BY Pojistovna.Kod, Pojistovna.Nazev, Zasoby_prodej.Cislo_pojistence,Lek.Kod,Lek.Cena,Lek.Doplatek;
+
+--výpis léků, které jsou na skladě
+SELECT Lek.Kod,Lek.Nazev,sum(Zasoby.Mnozstvi) as Na_sklade
+FROM Lek JOIN Zasoby on Zasoby.Kod_leku = Lek.Kod
+GROUP BY Lek.Kod,Lek.Nazev;
+
+--vypis telefonu zamestnanace Jana Novaka
+SELECT Zamestnanec.ID, Zamestnanec.Jmeno, Zamestnanec.Prijmeni, Telefon.Telefon, Telefon.Popis
+FROM Zamestnanec JOIN Telefon on Zamestnanec.ID = Telefon.ID_zamestnance
+WHERE Zamestnanec.Jmeno LIKE 'Jan' and Zamestnanec.Prijmeni LIKE 'Novák';
+
+--vypis vsechny prodeje zamestnance Petra Bohackova ze dne 3.1.2022
+SELECT Zamestnanec.ID, Zamestnanec.Jmeno, Zamestnanec.Prijmeni, Prodej.ID as ID_prodeje
+FROM Zamestnanec JOIN Prodej on Zamestnanec.ID = Prodej.ID_zamestnance
+WHERE Zamestnanec.Jmeno LIKE 'Petra' and Zamestnanec.Prijmeni LIKE 'Boháčková' and Prodej.Datum >= TO_TIMESTAMP('2022-01-03', 'YYYY-MM-DD') and Prodej.Datum < TO_TIMESTAMP('2022-01-04', 'YYYY-MM-DD');
+
+-- vypis vsechny zamestnance kteri neprovedli prodej
+SELECT *
+FROM Zamestnanec
+WHERE NOT EXISTS(SELECT * FROM Prodej WHERE Zamestnanec.ID = Prodej.ID_zamestnance);
+
+
+--vypis leku ktere nejsou na sklade
+SELECT Lek.Kod, Lek.Nazev
+FROM Lek
+WHERE (Lek.Kod) not in (SELECT Zasoby.Kod_leku FROM Zasoby) or (Lek.Kod) in (SELECT Zasoby.Kod_leku FROM Zasoby where Zasoby.Mnozstvi = '0')
