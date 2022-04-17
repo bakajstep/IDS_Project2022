@@ -199,8 +199,6 @@ FROM Zamestnanec JOIN Prodej ON Prodej.ID_zamestnance = Zamestnanec.ID
 GROUP BY Zamestnanec.ID,Zamestnanec.Jmeno, Zamestnanec.Prijmeni;
 
 --výpis výkazů pro pojišťovnu
---TODO možná to omezit jen na nějký měsíc
---TODO možná dát count na jednostlivé léky
 SELECT Pojistovna.Kod, Pojistovna.Nazev, Zasoby_prodej.Cislo_pojistence,Lek.Kod as Kod_leku,(Lek.Cena-Lek.Doplatek) as Proplaci_za_kus, count (*) as Pocet_kusu
 FROM Pojistovna JOIN Zasoby_prodej on Pojistovna.Kod = Zasoby_prodej.Kod_pojistovny JOIN Zasoby on Zasoby_prodej.ID_zasoby = Zasoby.ID JOIN Lek on Zasoby.Kod_leku = Lek.Kod
 GROUP BY Pojistovna.Kod, Pojistovna.Nazev, Zasoby_prodej.Cislo_pojistence,Lek.Kod,Lek.Cena,Lek.Doplatek;
