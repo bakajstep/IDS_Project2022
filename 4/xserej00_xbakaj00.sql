@@ -323,3 +323,41 @@ INSERT INTO Prodej(Datum, ID_zamestnance)
 VALUES (TO_TIMESTAMP('2022-01-02 00:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'), 2);
 INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistence)
 VALUES (7, 2, 111, '0101019875');
+
+------------------------------- PROCEDURES -------------------------------------
+CREATE OR REPLACE PROCEDURE "zasoby_leku"
+	("lek_kod" IN VARCHAR)
+AS
+	"mnozstvi_celkem" NUMBER;
+	"lek_mnozstvi" "Zasoby"."ID"%TYPE,"Zasoby"."Mnozstvi"%TYPE;
+	CURSOR "cursor_zasoby" IS SELECT "ID","Mnozstvi" FROM "Zasoby";
+BEGIN
+
+    "mnozstvi_celkem" := 0;
+
+    OPEN "cursor_zasoby"
+    LOOP
+        FETCH "cursor_zasoby" INTO "lek_mnozstvi";
+
+		EXIT WHEN "cursor_zasoby"%NOTFOUND;
+
+		IF "lek_mnozstvi"."ID" = "lek_kod" THEN
+			"mnozstvi_celkem" := "mnozstvi_celkem" + "lek_mnozstvi"."Mnozstvi";
+		END IF;
+	END LOOP;
+	CLOSE "cursor_zasoby";
+
+    DBMS_OUTPUT.put_line(
+		'ID :' || "lek_kod" || ' mnozstvi: ' || "mnozstvi_celkem"
+	);
+
+	EXCEPTION WHEN NO_DATA_FOUND THEN
+	BEGIN
+		DBMS_OUTPUT.put_line(
+			'ID :' || "lek_kod" || ' neni na sklade!'
+		);
+	END;
+
+END;
+
+BEGIN "zasoby_leku"('0229792'); END;
