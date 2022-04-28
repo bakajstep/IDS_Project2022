@@ -325,39 +325,45 @@ INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistenc
 VALUES (7, 2, 111, '0101019875');
 
 ------------------------------- PROCEDURES -------------------------------------
-CREATE OR REPLACE PROCEDURE "zasoby_leku"
-	("lek_kod" IN VARCHAR)
+CREATE OR REPLACE PROCEDURE zasoby_leku
+	(lek_kod IN INT)
 AS
-	"mnozstvi_celkem" NUMBER;
-	"lek_mnozstvi" "Zasoby"."ID"%TYPE,"Zasoby"."Mnozstvi"%TYPE;
-	CURSOR "cursor_zasoby" IS SELECT "ID","Mnozstvi" FROM "Zasoby";
+	mnozstvi_celkem NUMBER;
+	lek_id Zasoby."ID"%TYPE;
+	lek_mnozstvi Zasoby.Mnozstvi%TYPE;
+	CURSOR cursor_zasoby_id IS SELECT ID FROM Zasoby;
+	CURSOR cursor_zasoby_mnozstvi IS SELECT Mnozstvi FROM Zasoby;
 BEGIN
 
-    "mnozstvi_celkem" := 0;
+    mnozstvi_celkem := 0;
 
-    OPEN "cursor_zasoby"
+    OPEN cursor_zasoby_id;
+    OPEN cursor_zasoby_mnozstvi;
     LOOP
-        FETCH "cursor_zasoby" INTO "lek_mnozstvi";
+        FETCH cursor_zasoby_id INTO lek_id;
+        FETCH cursor_zasoby_mnozstvi INTO lek_mnozstvi;
 
-		EXIT WHEN "cursor_zasoby"%NOTFOUND;
+		EXIT WHEN cursor_zasoby_id%NOTFOUND;
 
-		IF "lek_mnozstvi"."ID" = "lek_kod" THEN
-			"mnozstvi_celkem" := "mnozstvi_celkem" + "lek_mnozstvi"."Mnozstvi";
+		IF lek_id = lek_kod THEN
+			mnozstvi_celkem := mnozstvi_celkem + lek_mnozstvi;
 		END IF;
 	END LOOP;
-	CLOSE "cursor_zasoby";
+	CLOSE cursor_zasoby_id;
+	CLOSE cursor_zasoby_mnozstvi;
+
 
     DBMS_OUTPUT.put_line(
-		'ID :' || "lek_kod" || ' mnozstvi: ' || "mnozstvi_celkem"
+		'ID :' || lek_kod || ' mnozstvi: ' || mnozstvi_celkem
 	);
 
 	EXCEPTION WHEN NO_DATA_FOUND THEN
 	BEGIN
 		DBMS_OUTPUT.put_line(
-			'ID :' || "lek_kod" || ' neni na sklade!'
+			'ID :' || lek_kod || ' neni na sklade!'
 		);
 	END;
 
 END;
 
-BEGIN "zasoby_leku"('0229792'); END;
+BEGIN zasoby_leku('0229792'); END;
