@@ -139,7 +139,7 @@ BEGIN
         FROM Lek
                  JOIN Zasoby Z on Lek.Kod = Z.Kod_leku
         WHERE Z.ID = :NEW.ID_zasoby;
-         
+
         SELECT Predpisovy_prodej
         INTO Je_Magistr
         FROM Prodej P
@@ -213,6 +213,8 @@ INSERT INTO Zasoby(Datum_spotreby, Mnozstvi, Kod_leku)
 VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'), 10, 0254048);
 INSERT INTO Zasoby(Datum_spotreby, Mnozstvi, Kod_leku)
 VALUES (TO_DATE('2024-01-01', 'yyyy/mm/dd'), 0, 0223159);
+INSERT INTO Zasoby(Datum_spotreby, Mnozstvi, Kod_leku)
+VALUES (TO_DATE('2023-02-01', 'yyyy/mm/dd'), 15, 0229792);
 
 INSERT INTO Prodej(Datum, ID_zamestnance)
 VALUES (TO_TIMESTAMP('2022-01-01 23:59:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'), 2);
@@ -313,57 +315,72 @@ GRANT ALL ON Zasoby to XSEREJ00;
 GRANT ALL ON Pojistovna to XSEREJ00;
 GRANT ALL ON Telefon to XSEREJ00;
 
--------------------------------- SHOW TRIGGERS FUNCTION ------------------------------
+GRANT ALL ON zasoby_leku to XSEREJ00;
 
--- Ukázka 1. triggeru zda mají primární klíč u tabulky Zamestnanec
-SELECT ID, Jmeno FROM Zamestnanec;
-
--- Ukázka 2. triggeru ze nemůže provést prodej nautorizovaný lékárník
-INSERT INTO Prodej(Datum, ID_zamestnance)
-VALUES (TO_TIMESTAMP('2022-01-02 00:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'), 2);
-INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistence)
-VALUES (7, 2, 111, '0101019875');
 
 ------------------------------- PROCEDURES -------------------------------------
-CREATE OR REPLACE PROCEDURE zasoby_leku
-	(lek_kod IN INT)
+
+-- 1. Procedura na úkázání určitého léku na skladě podle kodu ze SUKLu(našeho primárního klíče)
+CREATE OR REPLACE PROCEDURE zasoby_leku(lek_kod IN INT)
 AS
-	mnozstvi_celkem NUMBER;
-	lek_id Zasoby."ID"%TYPE;
-	lek_mnozstvi Zasoby.Mnozstvi%TYPE;
-	CURSOR cursor_zasoby_id IS SELECT ID FROM Zasoby;
-	CURSOR cursor_zasoby_mnozstvi IS SELECT Mnozstvi FROM Zasoby;
+    mnozstvi_celkem NUMBER;
+    lek_jmeno       varchar(50);
+    lek_id          Zasoby."ID"%TYPE;
+    lek_mnozstvi    Zasoby.Mnozstvi%TYPE;
+    CURSOR cursor_zasoby_id IS SELECT Kod_leku
+                               FROM Zasoby;
+    CURSOR cursor_zasoby_mnozstvi IS SELECT Mnozstvi
+                                     FROM Zasoby;
 BEGIN
 
     mnozstvi_celkem := 0;
-
+    SELECT NAZEV into lek_jmeno from Lek where Kod = lek_kod;
     OPEN cursor_zasoby_id;
     OPEN cursor_zasoby_mnozstvi;
     LOOP
         FETCH cursor_zasoby_id INTO lek_id;
         FETCH cursor_zasoby_mnozstvi INTO lek_mnozstvi;
 
-		EXIT WHEN cursor_zasoby_id%NOTFOUND;
+        EXIT WHEN cursor_zasoby_id%NOTFOUND;
 
-		IF lek_id = lek_kod THEN
-			mnozstvi_celkem := mnozstvi_celkem + lek_mnozstvi;
-		END IF;
-	END LOOP;
-	CLOSE cursor_zasoby_id;
-	CLOSE cursor_zasoby_mnozstvi;
+        IF lek_id = lek_kod THEN
+            mnozstvi_celkem := mnozstvi_celkem + lek_mnozstvi;
+        END IF;
+    END LOOP;
+    CLOSE cursor_zasoby_id;
+    CLOSE cursor_zasoby_mnozstvi;
 
 
     DBMS_OUTPUT.put_line(
-		'ID :' || lek_kod || ' mnozstvi: ' || mnozstvi_celkem
-	);
+                'ID :' || lek_kod || ' název: ' || lek_jmeno || ' mnozstvi: ' || mnozstvi_celkem
+        );
 
-	EXCEPTION WHEN NO_DATA_FOUND THEN
-	BEGIN
-		DBMS_OUTPUT.put_line(
-			'ID :' || lek_kod || ' neni na sklade!'
-		);
-	END;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        BEGIN
+            DBMS_OUTPUT.put_line(
+                    'ID :' || lek_kod || ' název: ' || lek_jmeno || ' neni na sklade!'
+                );
+        END;
 
 END;
+/
 
-BEGIN zasoby_leku('0229792'); END;
+------------------------------- SHOW PROCEDURES -------------------------------------
+
+-- Ověření funkčnosti 1. procedury
+BEGIN
+    zasoby_leku('0229792');
+END;
+
+-------------------------------- SHOW TRIGGERS FUNCTION ------------------------------
+
+-- Ukázka 1. triggeru zda mají primární klíč u tabulky Zamestnanec
+SELECT ID, Jmeno
+FROM Zamestnanec;
+
+-- Ukázka 2. triggeru ze nemůže provést prodej nautorizovaný lékárník
+--INSERT INTO Prodej(Datum, ID_zamestnance)
+--VALUES (TO_TIMESTAMP('2022-01-02 00:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'), 2);
+--INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistence)
+--VALUES (7, 2, 111, '0101019875');
