@@ -123,6 +123,8 @@ BEGIN
 END;
 /
 
+
+---- 2. Trigger pro automatickou kontrolu zda prodej léku na předpis provedl magistr(a)
 CREATE OR REPLACE TRIGGER Kontrola_prodeje
     BEFORE INSERT
     ON Zasoby_prodej
@@ -301,3 +303,13 @@ FROM Lek
 WHERE (Lek.Kod) not in (SELECT Zasoby.Kod_leku FROM Zasoby)
    or (Lek.Kod) in (SELECT Zasoby.Kod_leku FROM Zasoby where Zasoby.Mnozstvi = '0');
 
+-------------------------------- SHOW TRIGGERS FUNCTION ------------------------------
+
+-- Ukázka 1. triggeru zda mají primární klíč u tabulky Zamestnanec
+SELECT ID, Jmeno FROM Zamestnanec;
+
+-- Ukázka 2. triggeru ze nemůže provést prodej nautorizovaný lékárník
+INSERT INTO Prodej(Datum, ID_zamestnance)
+VALUES (TO_TIMESTAMP('2022-01-02 00:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'), 2);
+INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistence)
+VALUES (7, 2, 111, '0101019875');
