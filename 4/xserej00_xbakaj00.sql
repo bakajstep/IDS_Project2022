@@ -121,7 +121,7 @@ BEGIN
         :NEW.ID := Zamestnanec_id.NEXTVAL;
     END IF;
 END;
-
+/
 
 CREATE OR REPLACE TRIGGER Kontrola_prodeje
     BEFORE INSERT
@@ -132,21 +132,23 @@ DECLARE
     Na_Predpis VARCHAR(1);
 BEGIN
     IF INSERTING THEN
-        SELECT Prodej, Predpisovy_prodej
-        INTO Na_Predpis, Je_Magistr
+        SELECT Prodej
+        INTO Na_Predpis
         FROM Lek
                  JOIN Zasoby Z on Lek.Kod = Z.Kod_leku
-                 JOIN Zasoby_prodej Zp on Z.ID = Zp.ID_zasoby
-                 JOIN Prodej P on Zp.ID_prodeje = P.ID
+        WHERE Z.ID = :NEW.ID_zasoby;
+         
+        SELECT Predpisovy_prodej
+        INTO Je_Magistr
+        FROM Prodej P
                  JOIN Zamestnanec Zam on P.ID_zamestnance = Zam.ID
-        WHERE Zp.ID_zasoby = :new.ID_ZASOBY
-          AND Zp.ID_prodeje = :NEW.ID_PRODEJE;
+        WHERE P.ID = :NEW.ID_prodeje;
         IF Je_Magistr = 0 AND Na_Predpis = 'R' THEN
             RAISE_APPLICATION_ERROR(-20000, 'Tento zaměstnanec nemůže provést prodej na předpis!');
         END IF;
     END IF;
 END;
-
+/
 
 -------------------------------- INSERT VALUES ---------------------------------
 
