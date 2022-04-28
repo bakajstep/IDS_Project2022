@@ -303,6 +303,16 @@ FROM Lek
 WHERE (Lek.Kod) not in (SELECT Zasoby.Kod_leku FROM Zasoby)
    or (Lek.Kod) in (SELECT Zasoby.Kod_leku FROM Zasoby where Zasoby.Mnozstvi = '0');
 
+-------------------------------- PRIVILEGES ------------------------------------
+
+GRANT ALL ON Zamestnanec to XSEREJ00;
+GRANT ALL ON Lek to XSEREJ00;
+GRANT ALL ON Prodej to XSEREJ00;
+GRANT ALL ON Zasoby_prodej to XSEREJ00;
+GRANT ALL ON Zasoby to XSEREJ00;
+GRANT ALL ON Pojistovna to XSEREJ00;
+GRANT ALL ON Telefon to XSEREJ00;
+
 -------------------------------- SHOW TRIGGERS FUNCTION ------------------------------
 
 -- Ukázka 1. triggeru zda mají primární klíč u tabulky Zamestnanec
