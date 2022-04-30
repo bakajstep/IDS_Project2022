@@ -15,6 +15,8 @@ DROP TABLE Pojistovna;
 DROP TABLE Zamestnanec;
 DROP TABLE Lek;
 drop sequence ZAMESTNANEC_ID;
+drop materialized view VYPIS_ZAMESTNANCU;
+
 
 
 -------------------------------- CREATE ----------------------------------------
@@ -305,18 +307,6 @@ FROM Lek
 WHERE (Lek.Kod) not in (SELECT Zasoby.Kod_leku FROM Zasoby)
    or (Lek.Kod) in (SELECT Zasoby.Kod_leku FROM Zasoby where Zasoby.Mnozstvi = '0');
 
--------------------------------- PRIVILEGES ------------------------------------
-
-GRANT ALL ON Zamestnanec to XSEREJ00;
-GRANT ALL ON Lek to XSEREJ00;
-GRANT ALL ON Prodej to XSEREJ00;
-GRANT ALL ON Zasoby_prodej to XSEREJ00;
-GRANT ALL ON Zasoby to XSEREJ00;
-GRANT ALL ON Pojistovna to XSEREJ00;
-GRANT ALL ON Telefon to XSEREJ00;
-
-GRANT ALL ON zasoby_leku to XSEREJ00;
-
 
 ------------------------------- PROCEDURES -------------------------------------
 
@@ -366,6 +356,27 @@ EXCEPTION
 END;
 /
 
+------------------------------- MATERIALIZED VIEW -----------------------------------
+
+
+CREATE MATERIALIZED VIEW vypis_zamestnancu
+AS
+SELECT XBAKAJ00.Zamestnanec.ID, XBAKAJ00.Zamestnanec.JMENO, XBAKAJ00.Zamestnanec.PRIJMENI
+FROM XBAKAJ00.Zamestnanec;
+/
+
+-- Vypis prodeju pred insertem
+SELECT * FROM vypis_zamestnancu;
+
+-- Vlozeni novych dat
+INSERT INTO Zamestnanec (Jmeno, Prijmeni, Mesto, PSC, Ulice, Cislo_popisne, Cislo_bankovniho_uctu,
+                         Predpisovy_prodej)
+VALUES ('Eva', 'Nováková', 'Brno', 60200, 'Kolejní', 2, '123456788/9999', 1);
+
+-- Vypis prodeju po insertem
+SELECT * FROM vypis_zamestnancu;
+
+
 ------------------------------- SHOW PROCEDURES -------------------------------------
 
 -- Ověření funkčnosti 1. procedury
@@ -384,3 +395,16 @@ FROM Zamestnanec;
 --VALUES (TO_TIMESTAMP('2022-01-02 00:05:59.10', 'YYYY-MM-DD HH24:MI:SS.FF'), 2);
 --INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistence)
 --VALUES (7, 2, 111, '0101019875');
+
+-------------------------------- PRIVILEGES ------------------------------------
+
+GRANT ALL ON Zamestnanec to XSEREJ00;
+GRANT ALL ON Lek to XSEREJ00;
+GRANT ALL ON Prodej to XSEREJ00;
+GRANT ALL ON Zasoby_prodej to XSEREJ00;
+GRANT ALL ON Zasoby to XSEREJ00;
+GRANT ALL ON Pojistovna to XSEREJ00;
+GRANT ALL ON Telefon to XSEREJ00;
+GRANT ALL ON vypis_zamestnancu to XBAKAJ00;
+
+GRANT EXECUTE ON zasoby_leku to XSEREJ00;
