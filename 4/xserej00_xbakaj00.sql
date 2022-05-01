@@ -241,6 +241,8 @@ INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby)
 VALUES (2, 1);
 INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistence)
 VALUES (2, 2, 111, '0101019875');
+INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby, Kod_pojistovny, Cislo_pojistence)
+VALUES (3, 2, 111, '0101019875');
 INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby)
 VALUES (3, 3);
 INSERT INTO Zasoby_prodej(ID_prodeje, ID_zasoby)
@@ -356,6 +358,39 @@ EXCEPTION
 END;
 /
 
+
+-- 2. procedura pro výpis výkazu pro určitou pojišťovnu v daný měsíc
+CREATE OR REPLACE PROCEDURE pojistovna_vykaz (Pojistovna IN INT, Datum_prodeje IN TIMESTAMP)
+AS
+cislo_poj VARCHAR(10);
+kod INT;
+proplaci INT;
+proplaci_celkem INT;
+proplaci_cnt INT;
+CURSOR cursor_pojistovna IS SELECT Zasoby_prodej.Cislo_pojistence,Zasoby.Kod_leku, (Lek.Cena - Lek.Doplatek) as Proplaci_za_kus FROM Zasoby_prodej join Zasoby on Zasoby_prodej.ID_zasoby = Zasoby.ID join Lek on Lek.Kod = Zasoby.Kod_leku join Prodej on Zasoby_prodej.ID_prodeje = Prodej.ID WHERE Kod_pojistovny = Pojistovna and EXTRACT( MONTH from Prodej.Datum ) = EXTRACT( MONTH from Datum_prodeje ) and EXTRACT( YEAR from Prodej.Datum ) = EXTRACT( YEAR from Datum_prodeje );
+BEGIN
+    proplaci_celkem := 0;
+    proplaci_cnt := 0;
+    OPEN cursor_pojistovna;
+    LOOP
+        FETCH cursor_pojistovna INTO cislo_poj,kod,proplaci;
+        
+        EXIT WHEN cursor_pojistovna%NOTFOUND;
+        
+        proplaci_celkem := proplaci_celkem + proplaci;
+        proplaci_cnt := proplaci_cnt + 1;
+        DBMS_OUTPUT.put_line(
+                'cislo :' || cislo_poj || ' kod: ' || kod || ' proplaci: ' || proplaci
+        );
+    END LOOP;
+    CLOSE cursor_pojistovna;
+
+    DBMS_OUTPUT.put_line(
+                'celkem :' || proplaci_celkem || ' kod: ' || proplaci_cnt
+        );
+END;
+/
+
 ------------------------------- MATERIALIZED VIEW -----------------------------------
 
 
@@ -382,6 +417,11 @@ SELECT * FROM vypis_zamestnancu;
 -- Ověření funkčnosti 1. procedury
 BEGIN
     zasoby_leku('0229792');
+END;
+
+-- Ověření funkčnosti 2. procedury
+BEGIN
+    pojistovna_vykaz('111',TO_TIMESTAMP('2022-01', 'YYYY-MM'));
 END;
 
 -------------------------------- SHOW TRIGGERS FUNCTION ------------------------------
