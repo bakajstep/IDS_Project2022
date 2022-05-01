@@ -481,3 +481,4 @@ GRANT ALL ON Telefon to XSEREJ00;
 GRANT ALL ON vypis_zamestnancu to XBAKAJ00;
 
 GRANT EXECUTE ON zasoby_leku to XSEREJ00;
+GRANT EXECUTE ON pojistovna_vykaz to XSEREJ00;
