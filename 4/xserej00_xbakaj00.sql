@@ -6,7 +6,6 @@
 
 -------------------------------- DROP ------------------------------------------
 
-
 DROP TABLE Telefon;
 DROP TABLE Zasoby_prodej;
 DROP TABLE Prodej;
@@ -360,33 +359,42 @@ END;
 
 
 -- 2. procedura pro výpis výkazu pro určitou pojišťovnu v daný měsíc
-CREATE OR REPLACE PROCEDURE pojistovna_vykaz (Pojistovna IN INT, Datum_prodeje IN TIMESTAMP)
+CREATE OR REPLACE PROCEDURE pojistovna_vykaz(Pojistovna IN INT, Datum_prodeje IN TIMESTAMP)
 AS
-cislo_poj VARCHAR(10);
-kod INT;
-proplaci INT;
-proplaci_celkem INT;
-proplaci_cnt INT;
-CURSOR cursor_pojistovna IS SELECT Zasoby_prodej.Cislo_pojistence,Zasoby.Kod_leku, (Lek.Cena - Lek.Doplatek) as Proplaci_za_kus FROM Zasoby_prodej join Zasoby on Zasoby_prodej.ID_zasoby = Zasoby.ID join Lek on Lek.Kod = Zasoby.Kod_leku join Prodej on Zasoby_prodej.ID_prodeje = Prodej.ID WHERE Kod_pojistovny = Pojistovna and EXTRACT( MONTH from Prodej.Datum ) = EXTRACT( MONTH from Datum_prodeje ) and EXTRACT( YEAR from Prodej.Datum ) = EXTRACT( YEAR from Datum_prodeje );
+    cislo_poj       VARCHAR(10);
+    kod             INT;
+    proplaci        INT;
+    proplaci_celkem INT;
+    proplaci_cnt    INT;
+    CURSOR cursor_pojistovna IS SELECT Zasoby_prodej.Cislo_pojistence,
+                                       Zasoby.Kod_leku,
+                                       (Lek.Cena - Lek.Doplatek) as Proplaci_za_kus
+                                FROM Zasoby_prodej
+                                         join Zasoby on Zasoby_prodej.ID_zasoby = Zasoby.ID
+                                         join Lek on Lek.Kod = Zasoby.Kod_leku
+                                         join Prodej on Zasoby_prodej.ID_prodeje = Prodej.ID
+                                WHERE Kod_pojistovny = Pojistovna
+                                  and EXTRACT(MONTH from Prodej.Datum) = EXTRACT(MONTH from Datum_prodeje)
+                                  and EXTRACT(YEAR from Prodej.Datum) = EXTRACT(YEAR from Datum_prodeje);
 BEGIN
     proplaci_celkem := 0;
     proplaci_cnt := 0;
     OPEN cursor_pojistovna;
     LOOP
         FETCH cursor_pojistovna INTO cislo_poj,kod,proplaci;
-        
+
         EXIT WHEN cursor_pojistovna%NOTFOUND;
-        
+
         proplaci_celkem := proplaci_celkem + proplaci;
         proplaci_cnt := proplaci_cnt + 1;
         DBMS_OUTPUT.put_line(
                 'cislo :' || cislo_poj || ' kod: ' || kod || ' proplaci: ' || proplaci
-        );
+            );
     END LOOP;
     CLOSE cursor_pojistovna;
 
     DBMS_OUTPUT.put_line(
-                'celkem :' || proplaci_celkem || ' kod: ' || proplaci_cnt
+            'celkem :' || proplaci_celkem || ' kod: ' || proplaci_cnt
         );
 END;
 /
@@ -401,7 +409,8 @@ FROM XBAKAJ00.Zamestnanec;
 /
 
 -- Vypis prodeju pred insertem
-SELECT * FROM vypis_zamestnancu;
+SELECT *
+FROM vypis_zamestnancu;
 
 -- Vlozeni novych dat
 INSERT INTO Zamestnanec (Jmeno, Prijmeni, Mesto, PSC, Ulice, Cislo_popisne, Cislo_bankovniho_uctu,
@@ -409,7 +418,8 @@ INSERT INTO Zamestnanec (Jmeno, Prijmeni, Mesto, PSC, Ulice, Cislo_popisne, Cisl
 VALUES ('Eva', 'Nováková', 'Brno', 60200, 'Kolejní', 2, '123456788/9999', 1);
 
 -- Vypis prodeju po insertem
-SELECT * FROM vypis_zamestnancu;
+SELECT *
+FROM vypis_zamestnancu;
 
 
 ------------------------------- SHOW PROCEDURES -------------------------------------
@@ -421,8 +431,29 @@ END;
 
 -- Ověření funkčnosti 2. procedury
 BEGIN
-    pojistovna_vykaz('111',TO_TIMESTAMP('2022-01', 'YYYY-MM'));
+    pojistovna_vykaz('111', TO_TIMESTAMP('2022-01', 'YYYY-MM'));
 END;
+
+------------------------------- EXPLAIN PLAN -----------------------------------------
+
+EXPLAIN PLAN FOR
+SELECT Zamestnanec.ID, Zamestnanec.Jmeno, Zamestnanec.Prijmeni, count(Prodej.ID) as Pocet_prodeju
+FROM Zamestnanec
+         JOIN Prodej ON Prodej.ID_zamestnance = Zamestnanec.ID
+GROUP BY Zamestnanec.ID, Zamestnanec.Jmeno, Zamestnanec.Prijmeni;
+
+SELECT * FROM TABLE ( DBMS_XPLAN.DISPLAY );
+
+CREATE INDEX zamestnanec_index ON Zamestnanec (ID, Jmeno, Prijmeni);
+
+EXPLAIN PLAN FOR
+SELECT Zamestnanec.ID, Zamestnanec.Jmeno, Zamestnanec.Prijmeni, count(Prodej.ID) as Pocet_prodeju
+FROM Zamestnanec
+         JOIN Prodej ON Prodej.ID_zamestnance = Zamestnanec.ID
+GROUP BY Zamestnanec.ID, Zamestnanec.Jmeno, Zamestnanec.Prijmeni;
+
+SELECT * FROM TABLE ( DBMS_XPLAN.DISPLAY );
+
 
 -------------------------------- SHOW TRIGGERS FUNCTION ------------------------------
 
